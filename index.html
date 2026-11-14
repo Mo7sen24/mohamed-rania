@@ -654,6 +654,7 @@ html.so #fog i{animation-play-state:paused!important}
 (function(){
   // === بيانات الدعوة: غيّرها من هنا بس ===
   var C={n1:'Mohamed',n2:'Rania',date:'2026-11-26T19:00',venue:'Lana Venue',city:'Maadi, Cairo',phone:'',
+    sheet:'https://script.google.com/macros/s/AKfycbwqM9_BdWqurdox5k2NQicY78KvZpD2c-5XD3ooCRUCNvQLOHckT9K75BU_mDG9S0ze0w/exec', /* رابط Google Apps Script اللي بينتهي بـ /exec */
     prog:[['7:00 PM','Guests arrive'],['8:00 PM','Couple’s entrance'],['9:00 PM','Dinner'],['10:00 PM','Celebration']]};
   var $=function(i){return document.getElementById(i)},L='en-US',D=new Date(C.date),
       N=function(x){return x.toLocaleString(L,{useGrouping:false})},P=function(x){return(x<10?'0':'')+x};
@@ -674,12 +675,27 @@ html.so #fog i{animation-play-state:paused!important}
     for(var i=0;i<4;i++)if(v[i]!==last[i]){var e=$('cd'+i);e.textContent=N(v[i]);last[i]=v[i]}}
   cd();setInterval(cd,1000);
   var tt;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},3200)}
-  function rs(ok){var el=$('rn'),n=el.value.trim();
+  var busy=false;
+  function rs(ok){
+    var el=$('rn'),n=el.value.trim();
     if(!n){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad');el.focus();toast('Please enter your name first');return}
-    var m='Hello, this is '+n+(ok?'. I would be delighted to confirm my attendance':'. I regret that I am unable to attend')+' at the wedding of '+C.n1+' & '+C.n2+(ok?'. Number of guests: '+$('rg').value:'')+'.';
-    var w=$('rm').value.trim();if(w)m+=' My message for you: '+w;
-    toast('Opening WhatsApp…');
-    window.open('https://wa.me/'+C.phone.replace(/\D/g,'')+'?text='+encodeURIComponent(m),'_blank')}
+    if(busy)return;
+    if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/.test(C.sheet||'')){toast('RSVP is not available right now');return}
+    busy=true;
+    var by=$('ry'),bx=$('rx');by.disabled=true;bx.disabled=true;
+    var body=new URLSearchParams();
+    body.set('name',n);
+    body.set('attending',ok?'Yes':'No');
+    body.set('guests',ok?$('rg').value:'0');
+    body.set('message',$('rm').value.trim());
+    toast('Sending…');
+    var ctl=window.AbortController?new AbortController():null,
+        tmo=setTimeout(function(){if(ctl)ctl.abort()},20000);
+    fetch(C.sheet,{method:'POST',mode:'no-cors',body:body,signal:ctl?ctl.signal:undefined})
+      .then(function(){toast(ok?'Thank you! See you there ♥':'Thank you for letting us know')})
+      .catch(function(){toast('Couldn’t send. Please try again')})
+      .then(function(){clearTimeout(tmo);busy=false;by.disabled=false;bx.disabled=false});
+  }
   $('ry').onclick=function(){rs(1)};$('rx').onclick=function(){rs(0)};
   $('rn').addEventListener('animationend',function(){this.classList.remove('bad')});
   var o=document.querySelectorAll('.orn');for(var i=1;i<o.length;i++)o[i].src=o[0].src;
@@ -798,6 +814,7 @@ html.ar #fog i{animation-play-state:paused!important}
 #rest #p5 .env,#rest #p5 .tray,#rest #p6 .vsh{transition-duration:1s!important}
 .end-hands{transition-duration:1s,1.3s!important;transition-delay:.3s!important}
 .sec .bg{transition-duration:1.5s!important}
+.b:disabled{opacity:.6;cursor:default}
 </style>
 <button id="autoBtn" type="button" aria-label="Pause auto-scroll"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>
 <script>
